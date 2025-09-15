@@ -18,7 +18,6 @@ function initAnimations() {
         });
     }, observerOptions);
 
-    // Observe all animated elements
     document.querySelectorAll('.fade-in').forEach(el => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(30px)';
@@ -27,7 +26,7 @@ function initAnimations() {
     });
 }
 
-// Email subscription handler
+// Email submission handler with EmailJS
 function handleEmailSubmission(e) {
     e.preventDefault();
     
@@ -37,7 +36,6 @@ function handleEmailSubmission(e) {
     
     if (!email || isLoading) return;
     
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         showMessage('Please enter a valid email address', 'error');
@@ -48,31 +46,36 @@ function handleEmailSubmission(e) {
     submitBtn.textContent = 'Sending...';
     submitBtn.disabled = true;
     
-    // Simulate API call
-    setTimeout(() => {
+    // EmailJS send
+    emailjs.send('service_s1wnsp8', 'template_vjnh88v', {
+        user_email: email
+    }, 'nRRLaf6LXw6OLVSgZ') // Public Key as User ID
+    .then(() => {
         isLoading = false;
         isSubmitted = true;
-        
         submitBtn.textContent = 'Sent!';
         emailInput.value = '';
-        
-        showMessage('Thank you! We\'ll notify you when we launch.', 'success');
+        showMessage('Thanks! We\'ll notify you when we launch.', 'success');
         
         setTimeout(() => {
             submitBtn.textContent = 'Notify Me';
             submitBtn.disabled = false;
             isSubmitted = false;
         }, 2000);
-    }, 1000);
+    })
+    .catch((err) => {
+        console.log(err);
+        isLoading = false;
+        submitBtn.textContent = 'Notify Me';
+        submitBtn.disabled = false;
+        showMessage('Error sending email. Try again.', 'error');
+    });
 }
 
-// Show message function
+// Message popup
 function showMessage(text, type) {
-    // Remove existing message
     const existingMessage = document.querySelector('.message');
-    if (existingMessage) {
-        existingMessage.remove();
-    }
+    if (existingMessage) existingMessage.remove();
     
     const message = document.createElement('div');
     message.className = `message ${type}`;
@@ -93,58 +96,47 @@ function showMessage(text, type) {
     
     document.body.appendChild(message);
     
-    // Animate in
-    setTimeout(() => {
-        message.style.transform = 'translateX(0)';
-    }, 100);
-    
-    // Remove after 3 seconds
+    setTimeout(() => message.style.transform = 'translateX(0)', 100);
     setTimeout(() => {
         message.style.transform = 'translateX(100%)';
         setTimeout(() => message.remove(), 300);
     }, 3000);
 }
 
-// Social media click handlers
+// Social icons
 function openSocial(platform) {
     const urls = {
         linkedin: 'https://linkedin.com/company/ticketadda',
         instagram: 'https://instagram.com/ticketadda',
         twitter: 'https://twitter.com/ticketadda'
     };
-    
-    if (urls[platform]) {
-        window.open(urls[platform], '_blank');
-    }
+    if (urls[platform]) window.open(urls[platform], '_blank');
 }
 
-// Initialize everything when DOM is loaded
+// Init
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize animations
     initAnimations();
     
-    // Add form event listener
+    // Form submit
     const form = document.getElementById('email-form');
-    if (form) {
-        form.addEventListener('submit', handleEmailSubmission);
-    }
+    if (form) form.addEventListener('submit', handleEmailSubmission);
     
-    // Add social media event listeners
+    // Social icons
     document.querySelectorAll('.social-icon').forEach(icon => {
         icon.addEventListener('click', function() {
             const platform = this.getAttribute('data-platform');
             openSocial(platform);
         });
     });
-    
-    // Add input focus effects
+
+    // Input focus effects
     const emailInput = document.getElementById('email');
     if (emailInput) {
         emailInput.addEventListener('focus', function() {
             this.parentElement.style.borderColor = '#007AFF';
             this.parentElement.style.boxShadow = '0 0 0 3px rgba(0, 122, 255, 0.1)';
         });
-        
         emailInput.addEventListener('blur', function() {
             this.parentElement.style.borderColor = 'rgba(255, 255, 255, 0.2)';
             this.parentElement.style.boxShadow = 'none';
