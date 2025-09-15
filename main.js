@@ -26,53 +26,7 @@ function initAnimations() {
     });
 }
 
-// Email submission handler with EmailJS
-function handleEmailSubmission(e) {
-    e.preventDefault();
-    
-    const emailInput = document.getElementById('email');
-    const submitBtn = document.getElementById('submit-btn');
-    const email = emailInput.value.trim();
-    
-    if (!email || isLoading) return;
-    
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        showMessage('Please enter a valid email address', 'error');
-        return;
-    }
-    
-    isLoading = true;
-    submitBtn.textContent = 'Sending...';
-    submitBtn.disabled = true;
-    
-    // EmailJS send
-    emailjs.send('service_s1wnsp8', 'template_vjnh88v', {
-        user_email: email
-    }, 'nRRLaf6LXw6OLVSgZ') // Public Key as User ID
-    .then(() => {
-        isLoading = false;
-        isSubmitted = true;
-        submitBtn.textContent = 'Sent!';
-        emailInput.value = '';
-        showMessage('Thanks! We\'ll notify you when we launch.', 'success');
-        
-        setTimeout(() => {
-            submitBtn.textContent = 'Notify Me';
-            submitBtn.disabled = false;
-            isSubmitted = false;
-        }, 2000);
-    })
-    .catch((err) => {
-        console.log(err);
-        isLoading = false;
-        submitBtn.textContent = 'Notify Me';
-        submitBtn.disabled = false;
-        showMessage('Error sending email. Try again.', 'error');
-    });
-}
-
-// Message popup
+// Show popup messages
 function showMessage(text, type) {
     const existingMessage = document.querySelector('.message');
     if (existingMessage) existingMessage.remove();
@@ -103,43 +57,66 @@ function showMessage(text, type) {
     }, 3000);
 }
 
-// Social icons
-function openSocial(platform) {
-    const urls = {
-        linkedin: 'https://linkedin.com/company/ticketadda',
-        instagram: 'https://instagram.com/ticketadda',
-        twitter: 'https://twitter.com/ticketadda'
-    };
-    if (urls[platform]) window.open(urls[platform], '_blank');
+// Handle email submission
+function handleEmailSubmission(e) {
+    e.preventDefault();
+    
+    const emailInput = document.getElementById('emailInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const email = emailInput.value.trim();
+    
+    if (!email || isLoading) return;
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showMessage('Please enter a valid email address', 'error');
+        return;
+    }
+    
+    isLoading = true;
+    submitBtn.textContent = 'Sending...';
+    submitBtn.disabled = true;
+    
+    emailjs.send('service_s1wnsp8', 'template_vjnh88v', { user_email: email }, 'nRRLaf6LXw6OLVSgZ')
+
+    .then(() => {
+        isLoading = false;
+        isSubmitted = true;
+        submitBtn.textContent = 'Sent!';
+        emailInput.value = '';
+        showMessage("Thanks for reaching out! We'll notify you when we launch.", 'success');
+        
+        setTimeout(() => {
+            submitBtn.textContent = 'Notify Me';
+            submitBtn.disabled = false;
+            isSubmitted = false;
+        }, 2000);
+    })
+    .catch((err) => {
+        console.log(err);
+        isLoading = false;
+        submitBtn.textContent = 'Notify Me';
+        submitBtn.disabled = false;
+        showMessage('Error sending email. Try again.', 'error');
+    });
 }
 
-// Init
+// Handle social clicks
+function openSocial(url) {
+    window.open(url, '_blank');
+}
+
+// Init everything
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize animations
     initAnimations();
     
-    // Form submit
-    const form = document.getElementById('email-form');
+    const form = document.getElementById('emailForm');
     if (form) form.addEventListener('submit', handleEmailSubmission);
     
-    // Social icons
-    document.querySelectorAll('.social-icon').forEach(icon => {
-        icon.addEventListener('click', function() {
-            const platform = this.getAttribute('data-platform');
-            openSocial(platform);
+    document.querySelectorAll('.social-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            openSocial(this.href);
         });
     });
-
-    // Input focus effects
-    const emailInput = document.getElementById('email');
-    if (emailInput) {
-        emailInput.addEventListener('focus', function() {
-            this.parentElement.style.borderColor = '#007AFF';
-            this.parentElement.style.boxShadow = '0 0 0 3px rgba(0, 122, 255, 0.1)';
-        });
-        emailInput.addEventListener('blur', function() {
-            this.parentElement.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-            this.parentElement.style.boxShadow = 'none';
-        });
-    }
 });
