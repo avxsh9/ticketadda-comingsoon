@@ -2,6 +2,11 @@
 let isSubmitted = false;
 let isLoading = false;
 
+const SERVICE_ID = "service_mkonnv9";
+const TEMPLATE_ID = "template_a6rw28w";
+const PUBLIC_KEY = "kAZQ9dMKCEOt54Z8l";
+
+
 // Smooth scroll and fade-in animations
 function initAnimations() {
     const observerOptions = {
@@ -60,46 +65,63 @@ function showMessage(text, type) {
 // Handle email submission
 function handleEmailSubmission(e) {
     e.preventDefault();
-    
+
     const emailInput = document.getElementById('emailInput');
     const submitBtn = document.getElementById('submitBtn');
     const email = emailInput.value.trim();
-    
+
     if (!email || isLoading) return;
-    
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         showMessage('Please enter a valid email address', 'error');
         return;
     }
-    
+
     isLoading = true;
     submitBtn.textContent = 'Sending...';
     submitBtn.disabled = true;
-    
-    emailjs.send('service_s1wnsp8', 'template_vjnh88v', { user_email: email }, 'nRRLaf6LXw6OLVSgZ')
 
-    .then(() => {
-        isLoading = false;
-        isSubmitted = true;
-        submitBtn.textContent = 'Sent!';
-        emailInput.value = '';
-        showMessage("Thanks for reaching out! We'll notify you when we launch.", 'success');
-        
-        setTimeout(() => {
+    // 1️⃣ Send email to YOU (admin)
+    const adminPromise = emailjs.send(
+        'service_mkonnv9',       // new Gmail service ID
+        'template_a6rw28w',      // your template ID
+        { user_email: email, type: 'admin' },   // template params for admin
+        'kAZQ9dMKCEOt54Z8l'      // new public key
+    );
+
+    // 2️⃣ Send email to USER (subscriber)
+    const userPromise = emailjs.send(
+        'service_mkonnv9',
+        'template_a6rw28w',      // same template ID, can customize template for user
+        { user_email: email, type: 'user' },    // template params for user
+        'kAZQ9dMKCEOt54Z8l'
+    );
+    emailjs.send(SERVICE_ID, TEMPLATE_ID, { user_email: email }, PUBLIC_KEY)
+
+    Promise.all([adminPromise, userPromise])
+        .then(() => {
+            isLoading = false;
+            submitBtn.textContent = 'Sent!';
+            emailInput.value = '';
+            showMessage("Thanks! You'll get a confirmation email shortly.", 'success');
+
+            setTimeout(() => {
+                submitBtn.textContent = 'Notify Me';
+                submitBtn.disabled = false;
+            }, 2000);
+        })
+        .catch((err) => {
+            console.log("EmailJS error:", err);
+            isLoading = false;
             submitBtn.textContent = 'Notify Me';
             submitBtn.disabled = false;
-            isSubmitted = false;
-        }, 2000);
-    })
-    .catch((err) => {
-        console.log(err);
-        isLoading = false;
-        submitBtn.textContent = 'Notify Me';
-        submitBtn.disabled = false;
-        showMessage('Error sending email. Try again.', 'error');
-    });
+            showMessage('Error sending email. Try again.', 'error');
+        });
 }
+
+
+
 
 // Handle social clicks
 function openSocial(url) {
