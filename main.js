@@ -1,11 +1,9 @@
 // Email subscription functionality
-let isSubmitted = false;
 let isLoading = false;
 
 const SERVICE_ID = "service_mkonnv9";
 const TEMPLATE_ID = "template_a6rw28w";
 const PUBLIC_KEY = "kAZQ9dMKCEOt54Z8l";
-
 
 // Smooth scroll and fade-in animations
 function initAnimations() {
@@ -82,23 +80,23 @@ function handleEmailSubmission(e) {
     submitBtn.textContent = 'Sending...';
     submitBtn.disabled = true;
 
-    // 1️⃣ Send email to YOU (admin)
+    // 1️⃣ Send email to admin
     const adminPromise = emailjs.send(
-        'service_mkonnv9',       // new Gmail service ID
-        'template_a6rw28w',      // your template ID
-        { user_email: email, type: 'admin' },   // template params for admin
-        'kAZQ9dMKCEOt54Z8l'      // new public key
+        SERVICE_ID,
+        TEMPLATE_ID,
+        { user_email: email, type: 'admin' },
+        PUBLIC_KEY
     );
 
-    // 2️⃣ Send email to USER (subscriber)
+    // 2️⃣ Send email to user
     const userPromise = emailjs.send(
-        'service_mkonnv9',
-        'template_a6rw28w',      // same template ID, can customize template for user
-        { user_email: email, type: 'user' },    // template params for user
-        'kAZQ9dMKCEOt54Z8l'
+        SERVICE_ID,
+        TEMPLATE_ID,
+        { user_email: email, type: 'user' },
+        PUBLIC_KEY
     );
-    emailjs.send(SERVICE_ID, TEMPLATE_ID, { user_email: email }, PUBLIC_KEY)
 
+    // Wait for both emails to complete
     Promise.all([adminPromise, userPromise])
         .then(() => {
             isLoading = false;
@@ -119,9 +117,6 @@ function handleEmailSubmission(e) {
             showMessage('Error sending email. Try again.', 'error');
         });
 }
-
-
-
 
 // Handle social clicks
 function openSocial(url) {
