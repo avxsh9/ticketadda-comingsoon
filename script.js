@@ -84,7 +84,7 @@ function initRecaptcha() {
         if (typeof grecaptcha !== 'undefined') {
             try {
                 recaptchaWidget = grecaptcha.render('recaptcha-container', {
-                    'sitekey': '6LdAENErAAAAAFQvF9YE8vbZON2tljgphCwVwXJz', // Your site key
+                    'sitekey': '6LdAENErAAAAAIFJKfnjjhUb09jzAl0awQ70KBki', // Your site key
                     'size': 'invisible',
                     'callback': onRecaptchaSuccess,
                     'error-callback': onRecaptchaError,
