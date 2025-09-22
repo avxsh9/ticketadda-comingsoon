@@ -16,7 +16,6 @@ launchDate.setDate(launchDate.getDate() + 30);
 document.addEventListener('DOMContentLoaded', function() {
     initAnimations();
     initCountdown();
-    initRecaptcha();
     initEmailForm();
     initSocialLinks();
 });
@@ -75,32 +74,6 @@ function initCountdown() {
     updateCountdown();
     countdownInterval = setInterval(updateCountdown, 60000); // Update every minute
 }
-
-// ===============================
-// Initialize invisible reCAPTCHA
-// ===============================
-function initRecaptcha() {
-    window.onRecaptchaLoad = function() {
-        if (typeof grecaptcha !== 'undefined') {
-            try {
-                recaptchaWidget = grecaptcha.render('recaptcha-container', {
-                    'sitekey': '6LdTGdErAAAAACKRx6BiNY6nHM3wjFABi9v5TCNp', // Your site key
-                    'size': 'invisible',
-                    'callback': onRecaptchaSuccess,
-                    'error-callback': onRecaptchaError,
-                    'expired-callback': onRecaptchaExpired
-                });
-            } catch (error) {
-                console.error('reCAPTCHA initialization error:', error);
-            }
-        }
-    };
-
-    if (typeof grecaptcha !== 'undefined' && grecaptcha.render) {
-        onRecaptchaLoad();
-    }
-}
-
 
 // ===============================
 // reCAPTCHA callbacks
@@ -173,7 +146,7 @@ function handleEmailSubmission() {
 
     // Show loading state
     setLoadingState(true);
-
+    
     // Execute reCAPTCHA
     try {
         grecaptcha.execute(recaptchaWidget);
@@ -194,7 +167,7 @@ function submitFormWithCaptcha(captchaToken) {
     formData.append('email', email);
     formData.append('g-recaptcha-response', captchaToken);
 
-    fetch('verify.php', {
+    fetch('submit.php', {
         method: 'POST',
         body: formData,
         headers: {
@@ -204,7 +177,7 @@ function submitFormWithCaptcha(captchaToken) {
     .then(response => response.text())
     .then(data => {
         setLoadingState(false);
-
+        
         if (data.includes('successfully') || data.includes('Captcha Passed')) {
             showMessage('🎉 Success! You\'ll be notified when we launch.', 'success');
             resetForm();
@@ -219,7 +192,7 @@ function submitFormWithCaptcha(captchaToken) {
         console.error('Submission error:', error);
         setLoadingState(false);
         showMessage('Something went wrong. Please try again.', 'error');
-
+        
         // Reset reCAPTCHA on error
         try {
             grecaptcha.reset(recaptchaWidget);
@@ -235,7 +208,7 @@ function submitFormWithCaptcha(captchaToken) {
 function setLoadingState(loading) {
     isLoading = loading;
     const submitBtn = document.getElementById('submitBtn');
-
+    
     if (loading) {
         submitBtn.classList.add('loading');
         submitBtn.disabled = true;
@@ -258,7 +231,7 @@ function isValidEmail(email) {
 
 function validateEmailInput(email) {
     const emailInput = document.getElementById('emailInput');
-
+    
     if (email && !isValidEmail(email)) {
         emailInput.style.borderColor = 'rgba(255, 69, 58, 0.5)';
     } else {
@@ -271,13 +244,13 @@ function validateEmailInput(email) {
 // ===============================
 function showMessage(text, type) {
     clearMessages();
-
+    
     const messageEl = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
     if (!messageEl) return;
-
+    
     messageEl.textContent = text;
     messageEl.classList.add('show');
-
+    
     // Auto-hide after 5 seconds
     setTimeout(() => {
         messageEl.classList.remove('show');
@@ -287,7 +260,7 @@ function showMessage(text, type) {
 function clearMessages() {
     const successEl = document.getElementById('successMessage');
     const errorEl = document.getElementById('errorMessage');
-
+    
     if (successEl) successEl.classList.remove('show');
     if (errorEl) errorEl.classList.remove('show');
 }
@@ -299,10 +272,10 @@ function initSocialLinks() {
     document.querySelectorAll('.social-link').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-
+            
             const social = this.dataset.social;
             let url = '#';
-
+            
             switch (social) {
                 case 'twitter':
                     url = 'https://twitter.com/yourhandle';
@@ -317,7 +290,7 @@ function initSocialLinks() {
                     url = 'https://linkedin.com/company/yourcompany';
                     break;
             }
-
+            
             if (url !== '#') {
                 window.open(url, '_blank', 'noopener,noreferrer');
             }
@@ -342,3 +315,20 @@ window.addEventListener('error', function(e) {
         console.log('reCAPTCHA loading issue detected');
     }
 });
+
+// Make onRecaptchaLoad global
+window.onRecaptchaLoad = function() {
+    if (typeof grecaptcha !== 'undefined') {
+        try {
+            recaptchaWidget = grecaptcha.render('recaptcha-container', {
+                'sitekey': '6LdTGdErAAAAACKRx6BiNY6nHM3wjFABi9v5TCNp',
+                'size': 'invisible',
+                'callback': onRecaptchaSuccess,
+                'error-callback': onRecaptchaError,
+                'expired-callback': onRecaptchaExpired
+            });
+        } catch (error) {
+            console.error('reCAPTCHA initialization error:', error);
+        }
+    }
+};
