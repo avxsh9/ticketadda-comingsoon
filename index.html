@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coming Soon - Premium Experience Awaits</title>
+    <title>Coming Soon - TicketAdda</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit" async defer></script>
 </head>
 <body>
     <div class="container">
@@ -22,14 +21,13 @@
         <div class="content">
             <!-- Logo Section -->
             <div class="logo fade-in">
-                <h1>LUXURA</h1>
-                <div class="logo-subtitle">Premium Experience</div>
+                <img width="320px" src="image.png" alt="TicketAdda Logo" class="logo-image">
             </div>
 
             <!-- Main Message -->
             <div class="main-message fade-in">
-                <h2>Something Amazing is Coming</h2>
-                <p>We're crafting an extraordinary experience that will redefine luxury. Get ready for the future.</p>
+                <h2>India’s Premier Ticket Marketplace</h2>
+                <p>Be the first to get updates on events, concerts & sports</p>
             </div>
 
             <!-- Launch Info -->
@@ -49,6 +47,10 @@
                     <div class="countdown-item">
                         <span class="count" id="minutes">--</span>
                         <span class="label">Minutes</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="count" id="seconds">--</span>
+                        <span class="label">Seconds</span>
                     </div>
                 </div>
             </div>
@@ -70,11 +72,8 @@
                             <div class="loading-spinner"></div>
                         </button>
                     </div>
-                    
-                    <!-- Invisible reCAPTCHA -->
-                    <div id="recaptcha-container"></div>
                 </form>
-                
+
                 <!-- Messages -->
                 <div id="messageContainer" class="message-container">
                     <div id="successMessage" class="success-message"></div>
@@ -108,10 +107,14 @@
 
             <!-- Footer -->
             <div class="footer fade-in">
-                <p>&copy; 2025 Luxura. All rights reserved. | Crafted with precision.</p>
+                <p>&copy; 2025 TicketAdda. All rights reserved.</p>
             </div>
         </div>
     </div>
+    <script type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+    </script>
+    
 
     <script src="script.js"></script>
 </body>
