@@ -113,45 +113,60 @@
     const form = document.getElementById("emailForm");
     const successMessage = document.getElementById("successMessage");
     const errorMessage = document.getElementById("errorMessage");
-
+    const submitBtn = document.getElementById("submitBtn");
+    const loadingSpinner = document.getElementById("loadingSpinner");
+    
     form.addEventListener("submit", function(e) {
-      e.preventDefault(); // Prevent default form submission
-
-      // Get captcha response
-      const recaptchaResponse = grecaptcha.getResponse();
-      if (!recaptchaResponse) {
-        errorMessage.style.display = "block";
-        successMessage.style.display = "none";
-        return;
-      }
-
-      // Prepare form data
-      const formData = new FormData(form);
-
-      // Send to PHP via fetch
-      fetch("verify.php", {
-        method: "POST",
-        body: formData
-      })
-      .then(res => res.text())
-      .then(data => {
-        if (data.includes("Captcha Passed")) {
-          successMessage.style.display = "block";
-          errorMessage.style.display = "none";
-          form.reset();
-          grecaptcha.reset();
-        } else {
-          errorMessage.style.display = "block";
-          successMessage.style.display = "none";
-          grecaptcha.reset();
+        e.preventDefault(); // Prevent page reload
+    
+        // Get reCAPTCHA response
+        const recaptchaResponse = grecaptcha.getResponse();
+        if (!recaptchaResponse) {
+            errorMessage.style.display = "block";
+            successMessage.style.display = "none";
+            return;
         }
-      })
-      .catch(err => {
-        errorMessage.style.display = "block";
-        successMessage.style.display = "none";
-        grecaptcha.reset();
-      });
+    
+        // Show loading spinner
+        loadingSpinner.style.display = "inline-block";
+        submitBtn.disabled = true;
+    
+        // Prepare form data
+        const formData = new FormData(form);
+    
+        // Send to PHP backend via fetch
+        fetch("verify.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.text())
+        .then(data => {
+            // Hide loading spinner
+            loadingSpinner.style.display = "none";
+            submitBtn.disabled = false;
+    
+            if (data.includes("Captcha Passed")) {
+                successMessage.style.display = "block";
+                errorMessage.style.display = "none";
+    
+                // Reset only input fields, captcha manually
+                form.reset();
+                grecaptcha.reset();
+            } else {
+                errorMessage.style.display = "block";
+                successMessage.style.display = "none";
+                grecaptcha.reset();
+            }
+        })
+        .catch(err => {
+            loadingSpinner.style.display = "none";
+            submitBtn.disabled = false;
+            errorMessage.style.display = "block";
+            successMessage.style.display = "none";
+            grecaptcha.reset();
+        });
     });
-  </script>
+    </script>
+    
 </body>
 </html>
