@@ -1,24 +1,13 @@
 // ===============================
-// Premium Landing Page with reCAPTCHA
+// Global Variables
 // ===============================
-
 let isLoading = false;
 let countdownInterval;
-let recaptchaWidget;
 
-// Launch date (30 days from now)
-const launchDate = new Date();
-launchDate.setDate(launchDate.getDate() + 30);
-
-// ===============================
-// Initialize everything
-// ===============================
-document.addEventListener('DOMContentLoaded', function() {
-    initAnimations();
-    initCountdown();
-    initEmailForm();
-    initSocialLinks();
-});
+const SERVICE_ID = "service_mkonnv9";
+const TEMPLATE_ID = "template_a6rw28w";
+const PUBLIC_KEY = "kAZQ9dMKCEOt54Z8l";
+const launchDate = new Date('January 1, 2026 00:00:00').getTime();
 
 // ===============================
 // Smooth fade-in animations
@@ -32,25 +21,111 @@ function initAnimations() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
+                entry.target.style.opacity = "1";
+                entry.target.style.transform = "translateY(0)";
             }
         });
     }, observerOptions);
 
-    document.querySelectorAll('.fade-in').forEach((el, index) => {
-        // Stagger animations
-        el.style.transitionDelay = `${index * 0.1}s`;
+    document.querySelectorAll(".fade-in").forEach(el => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(30px)";
+        el.style.transition = "opacity 0.8s ease, transform 0.8s ease";
         observer.observe(el);
     });
 }
 
 // ===============================
-// Countdown timer
+// Show popup messages
+// ===============================
+function showMessage(text, type) {
+    const existingMessage = document.querySelector(".message");
+    if (existingMessage) existingMessage.remove();
+
+    const message = document.createElement("div");
+    message.className = `message ${type}`;
+    message.textContent = text;
+    message.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        color: #fff;
+        font-weight: bold;
+        border-radius: 6px;
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        ${type === "success" ? "background: #10b981;" : "background: #ef4444;"}
+    `;
+    document.body.appendChild(message);
+
+    setTimeout(() => message.style.transform = "translateX(0)", 100);
+    setTimeout(() => {
+        message.style.transform = "translateX(100%)";
+        setTimeout(() => message.remove(), 300);
+    }, 3000);
+}
+
+// ===============================
+// Handle email submission (SIRF EK BAAR EMAIL SEND HOGA)
+// ===============================
+function handleEmailSubmission(e) {
+    e.preventDefault();
+
+    const emailInput = document.getElementById("emailInput");
+    const submitBtn = document.getElementById("submitBtn");
+    const email = emailInput.value.trim();
+
+    if (!email || isLoading) return;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showMessage("Please enter a valid email address", "error");
+        return;
+    }
+
+    isLoading = true;
+    submitBtn.textContent = "Sending...";
+    submitBtn.disabled = true;
+
+    // Sirf ek baar email send karne ka code
+    emailjs.send(SERVICE_ID, TEMPLATE_ID, { user_email: email }, PUBLIC_KEY)
+        .then(() => {
+            isLoading = false;
+            submitBtn.textContent = "Sent!";
+            emailInput.value = "";
+            showMessage("Thanks! You'll get a confirmation email shortly.", "success");
+
+            setTimeout(() => {
+                submitBtn.textContent = "Notify Me";
+                submitBtn.disabled = false;
+            }, 2000);
+        })
+        .catch((err) => {
+            console.log("EmailJS error:", err);
+            isLoading = false;
+            submitBtn.textContent = "Notify Me";
+            submitBtn.disabled = false;
+            showMessage("Error sending email. Try again.", "error");
+        });
+}
+
+// ===============================
+// Handle social clicks
+// ===============================
+function openSocial(url) {
+    window.open(url, "_blank");
+}
+
+// ===============================
+// Countdown Timer Logic
 // ===============================
 function initCountdown() {
     const daysEl = document.getElementById('days');
     const hoursEl = document.getElementById('hours');
     const minutesEl = document.getElementById('minutes');
+    const secondsEl = document.getElementById('seconds');
 
     function updateCountdown() {
         const now = new Date().getTime();
@@ -60,275 +135,40 @@ function initCountdown() {
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
             if (daysEl) daysEl.textContent = String(days).padStart(2, '0');
             if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
             if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+            if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
         } else {
             if (daysEl) daysEl.textContent = '00';
             if (hoursEl) hoursEl.textContent = '00';
             if (minutesEl) minutesEl.textContent = '00';
+            if (secondsEl) secondsEl.textContent = '00';
+            clearInterval(countdownInterval);
         }
     }
 
     updateCountdown();
-    countdownInterval = setInterval(updateCountdown, 60000); // Update every minute
+    countdownInterval = setInterval(updateCountdown, 1000);
 }
 
-// ===============================
-// reCAPTCHA callbacks
-// ===============================
-function onRecaptchaSuccess(token) {
-    submitFormWithCaptcha(token);
-}
-
-function onRecaptchaError() {
-    showMessage('reCAPTCHA error occurred. Please try again.', 'error');
-    resetForm();
-}
-
-function onRecaptchaExpired() {
-    showMessage('reCAPTCHA expired. Please try again.', 'error');
-    resetForm();
-}
 
 // ===============================
-// Email form handling
+// Initialize everything when the page loads
 // ===============================
-function initEmailForm() {
-    const form = document.getElementById('emailForm');
-    const emailInput = document.getElementById('emailInput');
-    const submitBtn = document.getElementById('submitBtn');
+document.addEventListener("DOMContentLoaded", function() {
+    initAnimations();
+    initCountdown(); // Timer ko chalu karein
 
-    if (!form || !emailInput || !submitBtn) return;
+    const form = document.getElementById("emailForm");
+    if (form) form.addEventListener("submit", handleEmailSubmission);
 
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        handleEmailSubmission();
-    });
-
-    // Real-time email validation
-    emailInput.addEventListener('input', function() {
-        clearMessages();
-        validateEmailInput(this.value);
-    });
-
-    // Enter key handling
-    emailInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
+    document.querySelectorAll(".social-link").forEach(link => {
+        link.addEventListener("click", function(e) {
             e.preventDefault();
-            handleEmailSubmission();
-        }
-    });
-}
-
-// ===============================
-// Handle email submission
-// ===============================
-function handleEmailSubmission() {
-    if (isLoading) return;
-
-    const emailInput = document.getElementById('emailInput');
-    const email = emailInput.value.trim();
-
-    // Validate email
-    if (!email) {
-        showMessage('Please enter your email address', 'error');
-        emailInput.focus();
-        return;
-    }
-
-    if (!isValidEmail(email)) {
-        showMessage('Please enter a valid email address', 'error');
-        emailInput.focus();
-        return;
-    }
-
-    // Show loading state
-    setLoadingState(true);
-    
-    // Execute reCAPTCHA
-    try {
-        grecaptcha.execute(recaptchaWidget);
-    } catch (error) {
-        showMessage('reCAPTCHA not loaded. Please refresh the page.', 'error');
-        setLoadingState(false);
-    }
-}
-
-// ===============================
-// Submit form with captcha token
-// ===============================
-function submitFormWithCaptcha(captchaToken) {
-    const emailInput = document.getElementById('emailInput');
-    const email = emailInput.value.trim();
-
-    const formData = new FormData();
-    formData.append('email', email);
-    formData.append('g-recaptcha-response', captchaToken);
-
-    fetch('submit.php', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.text())
-    .then(data => {
-        setLoadingState(false);
-        
-        if (data.includes('successfully') || data.includes('Captcha Passed')) {
-            showMessage('🎉 Success! You\'ll be notified when we launch.', 'success');
-            resetForm();
-        } else if (data.includes('already exists') || data.includes('already subscribed')) {
-            showMessage('You\'re already on our list! Thanks for your interest.', 'error');
-            resetForm();
-        } else {
-            throw new Error(data);
-        }
-    })
-    .catch(error => {
-        console.error('Submission error:', error);
-        setLoadingState(false);
-        showMessage('Something went wrong. Please try again.', 'error');
-        
-        // Reset reCAPTCHA on error
-        try {
-            grecaptcha.reset(recaptchaWidget);
-        } catch (e) {
-            console.log('reCAPTCHA reset error:', e);
-        }
-    });
-}
-
-// ===============================
-// Form utilities
-// ===============================
-function setLoadingState(loading) {
-    isLoading = loading;
-    const submitBtn = document.getElementById('submitBtn');
-    
-    if (loading) {
-        submitBtn.classList.add('loading');
-        submitBtn.disabled = true;
-    } else {
-        submitBtn.classList.remove('loading');
-        submitBtn.disabled = false;
-    }
-}
-
-function resetForm() {
-    const emailInput = document.getElementById('emailInput');
-    emailInput.value = '';
-    setLoadingState(false);
-}
-
-function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
-
-function validateEmailInput(email) {
-    const emailInput = document.getElementById('emailInput');
-    
-    if (email && !isValidEmail(email)) {
-        emailInput.style.borderColor = 'rgba(255, 69, 58, 0.5)';
-    } else {
-        emailInput.style.borderColor = '';
-    }
-}
-
-// ===============================
-// Message handling
-// ===============================
-function showMessage(text, type) {
-    clearMessages();
-    
-    const messageEl = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
-    if (!messageEl) return;
-    
-    messageEl.textContent = text;
-    messageEl.classList.add('show');
-    
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-        messageEl.classList.remove('show');
-    }, 5000);
-}
-
-function clearMessages() {
-    const successEl = document.getElementById('successMessage');
-    const errorEl = document.getElementById('errorMessage');
-    
-    if (successEl) successEl.classList.remove('show');
-    if (errorEl) errorEl.classList.remove('show');
-}
-
-// ===============================
-// Social links
-// ===============================
-function initSocialLinks() {
-    document.querySelectorAll('.social-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const social = this.dataset.social;
-            let url = '#';
-            
-            switch (social) {
-                case 'twitter':
-                    url = 'https://twitter.com/yourhandle';
-                    break;
-                case 'facebook':
-                    url = 'https://facebook.com/yourpage';
-                    break;
-                case 'instagram':
-                    url = 'https://instagram.com/yourhandle';
-                    break;
-                case 'linkedin':
-                    url = 'https://linkedin.com/company/yourcompany';
-                    break;
-            }
-            
-            if (url !== '#') {
-                window.open(url, '_blank', 'noopener,noreferrer');
-            }
+            openSocial(this.href);
         });
     });
-}
-
-// ===============================
-// Cleanup on page unload
-// ===============================
-window.addEventListener('beforeunload', function() {
-    if (countdownInterval) {
-        clearInterval(countdownInterval);
-    }
 });
-
-// ===============================
-// Error handling for reCAPTCHA
-// ===============================
-window.addEventListener('error', function(e) {
-    if (e.message && e.message.includes('recaptcha')) {
-        console.log('reCAPTCHA loading issue detected');
-    }
-});
-
-// Make onRecaptchaLoad global
-window.onRecaptchaLoad = function() {
-    if (typeof grecaptcha !== 'undefined') {
-        try {
-            recaptchaWidget = grecaptcha.render('recaptcha-container', {
-                'sitekey': '6LdTGdErAAAAACKRx6BiNY6nHM3wjFABi9v5TCNp',
-                'size': 'invisible',
-                'callback': onRecaptchaSuccess,
-                'error-callback': onRecaptchaError,
-                'expired-callback': onRecaptchaExpired
-            });
-        } catch (error) {
-            console.error('reCAPTCHA initialization error:', error);
-        }
-    }
-};
