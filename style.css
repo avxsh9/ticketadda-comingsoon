@@ -112,6 +112,7 @@ body {
 
 /* Logo */
 .logo {
+    margin-top: 60px;
     margin-bottom: 3rem;
 }
 
@@ -147,7 +148,7 @@ body {
 }
 
 .main-message h2 {
-    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-size: 40px;
     font-weight: 60;
     margin-bottom: 1rem;
     color: #f5f5f7;
@@ -264,7 +265,7 @@ html, body {
 
 /* Email Section */
 .email-section {
-    margin-bottom: 4rem;
+    margin-bottom: 1rem;
 }
 
 .email-text {
@@ -439,7 +440,7 @@ html, body {
     transform: translateY(0);
 }
 
-/* Social Links */
+/* Social Links Base Styles */
 .social-links {
     display: flex;
     justify-content: center;
@@ -447,7 +448,9 @@ html, body {
     margin-bottom: 3rem;
 }
 
-.social-link {
+.social-link-x,
+.social-link-ig,
+.social-link-linkedin {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -456,39 +459,47 @@ html, body {
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 50%;
-    color: #a1a1a6;
+    color: #a1a1a6; /* Default Icon Color */
     text-decoration: none;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease-in-out;
     backdrop-filter: blur(20px);
-    position: relative;
-    overflow: hidden;
 }
 
-.social-link::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, rgba(0, 122, 255, 0.2), rgba(255, 255, 255, 0.1));
-    opacity: 0;
-    transition: opacity 0.3s ease;
+/* Common Hover Effect for All Icons */
+.social-link-x:hover,
+.social-link-ig:hover,
+.social-link-linkedin:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
-.social-link:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(0, 122, 255, 0.3);
-    color: #007aff;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 122, 255, 0.15);
+/* --- Specific Hover Styles --- */
+
+/* X.com Hover */
+.social-link-x:hover {
+    background: #000000;
+    border-color: #000000;
+    color: #ffffff; /* Icon color becomes white */
 }
 
-.social-link:hover::before {
-    opacity: 1;
+/* Instagram Hover */
+.social-link-ig:hover {
+    /* Instagram's famous gradient background */
+    background: radial-gradient(circle at 60% 109%, #fdf497 0%, #fdf497 5%, #fd5949 45%,#d6249f 60%,#285AEB 90%);
+    border-color: rgba(255, 255, 255, 0.55);
+    color: #ffffff; /* Icon color becomes white */
 }
 
-.social-link svg {
+/* LinkedIn Hover */
+.social-link-linkedin:hover {
+    background: #0A66C2; /* Official LinkedIn Blue */
+    border-color: #0A66C2;
+    color: #ffffff; /* Icon color becomes white */
+}
+
+.social-link-x svg,
+.social-link-ig svg,
+.social-link-linkedin svg {
     position: relative;
     z-index: 1;
 }
