@@ -7,6 +7,7 @@ let countdownInterval;
 const SERVICE_ID = "service_mkonnv9";
 const TEMPLATE_ID = "template_a6rw28w";
 const PUBLIC_KEY = "kAZQ9dMKCEOt54Z8l";
+// Set launch date to January 1, 2026, 00:00:00
 const launchDate = new Date('January 1, 2026 00:00:00').getTime();
 
 // ===============================
@@ -21,16 +22,14 @@ function initAnimations() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.style.opacity = "1";
-                entry.target.style.transform = "translateY(0)";
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target); // Stop observing once visible
             }
         });
     }, observerOptions);
 
     document.querySelectorAll(".fade-in").forEach(el => {
-        el.style.opacity = "0";
-        el.style.transform = "translateY(30px)";
-        el.style.transition = "opacity 0.8s ease, transform 0.8s ease";
+        // Initial state handled by CSS, observer adds 'visible' class
         observer.observe(el);
     });
 }
@@ -39,32 +38,27 @@ function initAnimations() {
 // Show popup messages
 // ===============================
 function showMessage(text, type) {
-    const existingMessage = document.querySelector(".message");
-    if (existingMessage) existingMessage.remove();
+    const messageContainer = document.getElementById("messageContainer");
+    const successMessage = document.getElementById("successMessage");
+    const errorMessage = document.getElementById("errorMessage");
 
-    const message = document.createElement("div");
-    message.className = `message ${type}`;
-    message.textContent = text;
-    message.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 12px 20px;
-        color: #fff;
-        font-weight: bold;
-        border-radius: 6px;
-        z-index: 1000;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-        ${type === "success" ? "background: #10b981;" : "background: #ef4444;"}
-    `;
-    document.body.appendChild(message);
+    // Hide any currently visible messages
+    successMessage.classList.remove("show");
+    errorMessage.classList.remove("show");
 
-    setTimeout(() => message.style.transform = "translateX(0)", 100);
+    let targetMessage;
+    if (type === "success") {
+        targetMessage = successMessage;
+    } else {
+        targetMessage = errorMessage;
+    }
+
+    targetMessage.textContent = text;
+    targetMessage.classList.add("show");
+
     setTimeout(() => {
-        message.style.transform = "translateX(100%)";
-        setTimeout(() => message.remove(), 300);
-    }, 3000);
+        targetMessage.classList.remove("show");
+    }, 4000); // Message visible for 4 seconds
 }
 
 // ===============================
@@ -86,33 +80,35 @@ function handleEmailSubmission(e) {
     }
 
     isLoading = true;
-    submitBtn.textContent = "Sending...";
+    submitBtn.classList.add("loading"); // Add loading class for spinner
     submitBtn.disabled = true;
 
     // Sirf ek baar email send karne ka code
     emailjs.send(SERVICE_ID, TEMPLATE_ID, { user_email: email }, PUBLIC_KEY)
         .then(() => {
             isLoading = false;
-            submitBtn.textContent = "Sent!";
+            submitBtn.classList.remove("loading");
+            submitBtn.querySelector(".btn-text").textContent = "Sent!"; // Update text
             emailInput.value = "";
             showMessage("Thanks! You'll get a confirmation email shortly.", "success");
 
             setTimeout(() => {
-                submitBtn.textContent = "Notify Me";
+                submitBtn.querySelector(".btn-text").textContent = "Notify Me"; // Reset text
                 submitBtn.disabled = false;
             }, 2000);
         })
         .catch((err) => {
-            console.log("EmailJS error:", err);
+            console.error("EmailJS error:", err);
             isLoading = false;
-            submitBtn.textContent = "Notify Me";
+            submitBtn.classList.remove("loading");
+            submitBtn.querySelector(".btn-text").textContent = "Notify Me"; // Reset text
             submitBtn.disabled = false;
-            showMessage("Error sending email. Try again.", "error");
+            showMessage("Error sending email. Please try again.", "error");
         });
 }
 
 // ===============================
-// Handle social clicks
+// Handle social clicks (now in footer)
 // ===============================
 function openSocial(url) {
     window.open(url, "_blank");
@@ -142,11 +138,15 @@ function initCountdown() {
             if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
             if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
         } else {
+            // If countdown is over
             if (daysEl) daysEl.textContent = '00';
             if (hoursEl) hoursEl.textContent = '00';
             if (minutesEl) minutesEl.textContent = '00';
             if (secondsEl) secondsEl.textContent = '00';
             clearInterval(countdownInterval);
+            // Optionally, update launch badge or show a "Launched!" message
+            const launchBadge = document.querySelector('.launch-badge span');
+            if (launchBadge) launchBadge.textContent = '🎉 We are LIVE!';
         }
     }
 
@@ -154,18 +154,39 @@ function initCountdown() {
     countdownInterval = setInterval(updateCountdown, 1000);
 }
 
+// ===============================
+// Primary CTA Button Scroll
+// ===============================
+function setupPrimaryCtaScroll() {
+    const primaryCtaBtn = document.getElementById('primaryCtaBtn');
+    const emailSubscriptionSection = document.getElementById('emailSubscriptionSection');
+
+    if (primaryCtaBtn && emailSubscriptionSection) {
+        primaryCtaBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            emailSubscriptionSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Optionally focus the email input after scrolling
+            setTimeout(() => {
+                const emailInput = document.getElementById('emailInput');
+                if (emailInput) emailInput.focus();
+            }, 600); // Adjust timeout to match scroll duration
+        });
+    }
+}
 
 // ===============================
 // Initialize everything when the page loads
 // ===============================
 document.addEventListener("DOMContentLoaded", function() {
     initAnimations();
-    initCountdown(); // Timer ko chalu karein
+    initCountdown();
+    setupPrimaryCtaScroll();
 
     const form = document.getElementById("emailForm");
     if (form) form.addEventListener("submit", handleEmailSubmission);
 
-    document.querySelectorAll(".social-link").forEach(link => {
+    // Event listeners for social links in the footer
+    document.querySelectorAll(".social-links a").forEach(link => {
         link.addEventListener("click", function(e) {
             e.preventDefault();
             openSocial(this.href);
