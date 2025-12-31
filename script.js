@@ -8,7 +8,7 @@ const SERVICE_ID = "service_mkonnv9";
 const TEMPLATE_ID = "template_a6rw28w";
 const PUBLIC_KEY = "kAZQ9dMKCEOt54Z8l";
 // Set launch date to January 1, 2026, 00:00:00
-const launchDate = new Date('january 27, 2025 15:38:00').getTime();
+const launchDate = new Date('january 27, 2026 15:38:00').getTime();
 
 // ===============================
 // Smooth fade-in animations
